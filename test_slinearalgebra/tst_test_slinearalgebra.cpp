@@ -1,5 +1,6 @@
 #include <QString>
 #include <QtTest>
+#include <limits>
 #include <../random_for_tests.h>
 #include <../../SLib/slinearalgebra.h>
 
@@ -16,6 +17,8 @@ private:
 private Q_SLOTS:
     // здесь пишется сигнатура метода - теста
     void test_sort();
+    void test_VieteCardanoMethod();
+   // void test_operator_multiply();
 };
 
 Test_slinearalgebra::Test_slinearalgebra()
@@ -38,11 +41,48 @@ void Test_slinearalgebra::test_sort()
         //Генерация случайного (воспроизводимого) вектора
         SVector_3D vec{pick(-50.,50.),pick(-50.,50.),pick(-50.,50.)};
         vec.sort();//выполняем сортировку
-        //проверка выполения условия
+        //проверка выполения условия        
         QVERIFY(vec.x >= vec.y && vec.y >= vec.z);
     }
     // В итоге мы проверили сортировку на 50 случайных векторах
 }
+
+void Test_slinearalgebra::test_VieteCardanoMethod()
+{
+    for (int i=0;i<50;++i)
+    {
+        //Генерация случайного (воспроизводимого) вектора
+        SVector_3D vec1{pick(-50.,50.),pick(-50.,50.),pick(-50.,50.)};
+        vec1.sort();//выполняем сортировку
+        //проверка выполения условия
+        SMatrix_3x3 mat(1.);
+        mat.a(1,1)=vec1.x;
+        mat.a(2,2)=vec1.y;
+        mat.a(3,3)=vec1.z;
+
+        SVector_3D roots1=mat.eigenvalues();
+        //проверка выполения условия
+        using namespace  std;
+        const double accurance=1e-7;
+        QVERIFY(fabs(vec1.x-roots1.x)<=accurance);
+        QVERIFY(fabs(vec1.y-roots1.y)<=accurance);
+        QVERIFY(fabs(vec1.z-roots1.z)<=accurance);
+    }
+}
+
+/*void Test_slinearalgebra::test_operator_multiply()
+{
+    //первое перемножение
+    SMatrix_3x3 mat1({1,4,7},{2,5,8},{7,8,9});// тк смотри 99 строкуSMatrix_3x3::SMatrix_3x3(const SVector_3D &col1, const SVector_3D &col2, const SVector_3D &col3)
+    SMatrix_3x3 mat2({10,13,16},{11,14,17},{12,15,18});
+    SMatrix_3x3 testmean({84,201,318},{90,216,342},{96,231,366}); // задали вручную, посчитав результат перемноения
+    SMatrix_3x3 meanmat;
+    meanmat = mat1*mat2;
+    //const double accurance=1e-7;
+    QVERIFY(meanmat==testmean);//нет оператора равно для этого Smatrix_3ч класса
+
+
+}*/
 /* Далее переходим к тестированию SMatrix_3x3
  * Сложных методов здесь гораздо больше и это:
  *  -VieteCardanoMethod()
